@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>METRO // OCC — Cyber Command</title>
+<style>
+:root{
+  --bg:#02040b; --panel:rgba(7,12,27,.78); --panel2:rgba(10,18,38,.72);
+  --line:#22dfff; --cyan:#58f6ff; --cyan2:#168cff; --violet:#9b6cff;
+  --pink:#ff3bd4; --green:#49ffbd; --amber:#ffd166; --red:#ff4f7b;
+  --text:#eafcff; --muted:#7895ad; --grid:rgba(66,220,255,.075);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#01030a;color:var(--text);
+font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans TC",monospace}
+body{
+  background:
+    radial-gradient(circle at 50% 40%,rgba(18,73,140,.15),transparent 42%),
+    radial-gradient(circle at 85% 15%,rgba(122,54,220,.09),transparent 30%),
+    #01030a;
+}
+body:before{content:"";position:fixed;inset:0;background:
+linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+background-size:32px 32px;opacity:.5;pointer-events:none}
+body:after{content:"";position:fixed;inset:0;background:
+repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px);
+mix-blend-mode:screen;pointer-events:none}
+#app{height:100vh;display:grid;grid-template-rows:76px 1fr 40px;gap:8px;padding:8px;
+filter:drop-shadow(0 0 20px rgba(0,220,255,.12))}
+header,.ticker,section,.panel{
+border:1px solid rgba(72,228,255,.42);
+background:linear-gradient(145deg,rgba(8,19,39,.82),rgba(3,7,19,.88));
+box-shadow:inset 0 0 35px rgba(0,210,255,.055),0 0 25px rgba(0,145,255,.09);
+position:relative;backdrop-filter:blur(10px)}
+header:before,.panel:before,section:before{content:"";position:absolute;inset:0;
+border:1px solid rgba(154,108,255,.13);pointer-events:none}
+header:after,.panel:after,section:after{content:"";position:absolute;left:12px;right:12px;top:-1px;height:1px;
+background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.55;box-shadow:0 0 10px var(--cyan);pointer-events:none}
+header{display:grid;grid-template-columns:330px 1fr 390px;align-items:center;padding:0 20px;overflow:hidden}
+.brand{font-weight:900;letter-spacing:2px;color:#fff;font-size:20px;text-shadow:0 0 10px rgba(88,246,255,.45)}
+.brand small{display:block;color:var(--cyan);font-size:9px;letter-spacing:3px;margin-top:4px}
+.clock{text-align:center;font-size:37px;font-weight:900;color:#eaffff;text-shadow:0 0 8px var(--cyan),0 0 28px rgba(34,223,255,.5);letter-spacing:4px}
+.clock small{display:block;font-size:9px;color:var(--muted);letter-spacing:3px;margin-top:2px}
+.status{text-align:right;font-size:11px}.status b{color:var(--green);text-shadow:0 0 8px rgba(73,255,189,.55)}
+.status .alert{color:var(--violet);font-size:10px;margin-top:7px}
+main{min-height:0;display:grid;grid-template-columns:270px 1fr 330px;gap:8px}
+.left,.right{min-height:0;display:grid;gap:8px}.left{grid-template-rows:1fr 1fr}.right{grid-template-rows:1.05fr .95fr}
+.panel{padding:11px;min-height:0;overflow:hidden}
+.title{font-size:10px;color:var(--cyan);letter-spacing:2px;border-bottom:1px solid rgba(88,246,255,.2);
+padding-bottom:8px;margin-bottom:8px;text-shadow:0 0 8px rgba(88,246,255,.35)}
+.line{display:grid;grid-template-columns:30px 1fr 70px;align-items:center;padding:9px 4px;
+border-bottom:1px solid rgba(255,255,255,.055);font-size:10px}
+.badge{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-weight:900;color:#03101a;
+box-shadow:0 0 13px currentColor;transform:skew(-8deg)}
+.r{background:#ff4f7b}.g{background:#49ffbd}.o{background:#ffd166}.a{background:#9b6cff}.y{background:#ffe85c}.b{background:#3ea8ff}
+.good{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}
+.center{min-width:0;min-height:0;display:grid;grid-template-rows:1fr 185px;gap:8px}
+.map{position:relative;overflow:hidden;padding:12px}
+.mapgrid{position:absolute;inset:0;background:
+radial-gradient(circle at 50% 52%,rgba(34,223,255,.12),transparent 30%),
+radial-gradient(circle at 50% 52%,rgba(110,75,255,.08),transparent 48%),
+linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+background-size:auto,auto,26px 26px}
+.map h2{position:relative;margin:0;font-size:12px;color:#fff;letter-spacing:1px}
+.map h2 span{color:var(--cyan);font-size:9px;margin-left:10px}
+svg{position:absolute;inset:42px 10px 10px;width:calc(100% - 20px);height:calc(100% - 52px)}
+.route{fill:none;stroke-width:4;filter:drop-shadow(0 0 5px currentColor) drop-shadow(0 0 12px currentColor);
+stroke-linecap:round;stroke-linejoin:round}
+.station{fill:#020817;stroke-width:2.5;filter:drop-shadow(0 0 5px currentColor)}
+.train{filter:drop-shadow(0 0 7px currentColor) drop-shadow(0 0 16px currentColor)}
+.train rect{rx:3;fill:#efffff;stroke:currentColor;stroke-width:3}
+.maplabel{font-size:9px;fill:#8fb8c8}.hub{font-size:11px;fill:#fff;font-weight:bold;filter:drop-shadow(0 0 7px var(--cyan))}
+.scan{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+box-shadow:0 0 16px var(--cyan);animation:scan 3.2s linear infinite;opacity:.6}
+@keyframes scan{from{top:50px}to{top:100%}}
+.bottom{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.metric{padding:10px;border:1px solid rgba(88,246,255,.18);background:linear-gradient(135deg,rgba(7,22,43,.7),rgba(3,7,17,.55));
+position:relative;overflow:hidden}
+.metric:before{content:"";position:absolute;inset:auto 0 0;height:2px;background:linear-gradient(90deg,var(--cyan),transparent)}
+.big{font-size:28px;color:var(--cyan);font-weight:900;text-shadow:0 0 12px rgba(88,246,255,.5)}
+.metric small{color:var(--muted);letter-spacing:1px}.spark{height:55px;margin-top:7px;position:relative}.spark svg{inset:0;width:100%;height:100%}
+table{width:100%;border-collapse:collapse;font-size:9px}td{padding:7px 3px;border-bottom:1px solid rgba(255,255,255,.055)}td:last-child{text-align:right;color:var(--cyan)}
+.cctv{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cam{height:105px;border:1px solid rgba(88,246,255,.28);background:
+radial-gradient(circle at 50% 50%,rgba(88,246,255,.14),transparent 35%),
+linear-gradient(120deg,#07182a,#01040b);position:relative;overflow:hidden}
+.cam:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 5px,rgba(88,246,255,.035) 5px 6px);animation:camScan 2.4s linear infinite}
+@keyframes camScan{from{transform:translateY(-10px)}to{transform:translateY(10px)}}
+.cam:after{content:"● LIVE";position:absolute;right:5px;top:4px;color:var(--red);font-size:7px;text-shadow:0 0 6px var(--red)}
+.cam .trainvis{position:absolute;bottom:18px;left:12%;width:76%;height:22px;border:2px solid #bfefff;border-radius:4px;box-shadow:0 0 12px #28cfff}
+.cam span{position:absolute;left:5px;bottom:4px;font-size:7px;color:#8ab5c4}
+.alertrow{display:grid;grid-template-columns:22px 1fr auto;gap:6px;align-items:center;padding:8px 2px;
+border-bottom:1px solid rgba(255,255,255,.06);font-size:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px currentColor}.dot.warn{background:var(--amber)}.dot.bad{background:var(--red)}
+.ticker{display:flex;align-items:center;white-space:nowrap;overflow:hidden;color:var(--cyan);font-size:10px;letter-spacing:1px;
+background:linear-gradient(90deg,rgba(9,20,40,.95),rgba(4,9,20,.8))}
+.ticker span{display:inline-block;padding-left:100%;animation:marquee 18s linear infinite}@keyframes marquee{to{transform:translateX(-100%)}}
+.pulse{animation:pulse 1.5s ease-in-out infinite}@keyframes pulse{50%{opacity:.45}}
+.blink{animation:blink .8s steps(2,end) infinite}@keyframes blink{50%{opacity:.2}}
+#events{height:100%;overflow:hidden}.tiny{font-size:8px;color:var(--muted)}
+.corner{position:absolute;width:8px;height:8px;border-color:var(--violet);border-style:solid;z-index:3}
+.tl{left:-1px;top:-1px;border-width:2px 0 0 2px}.tr{right:-1px;top:-1px;border-width:2px 2px 0 0}
+.bl{left:-1px;bottom:-1px;border-width:0 0 2px 2px}.br{right:-1px;bottom:-1px;border-width:0 2px 2px 0}
+
+/* FUTURE COMMAND CORE */
+.commandCore{filter:drop-shadow(0 0 10px rgba(88,246,255,.7))}
+.coreRing{fill:none;stroke:var(--cyan);vector-effect:non-scaling-stroke}
+.ring1{stroke-width:1.5;stroke-dasharray:4 7;opacity:.9;animation:coreSpin 9s linear infinite}
+.ring2{stroke-width:1;stroke:var(--violet);stroke-dasharray:2 5;opacity:.85;animation:coreSpinReverse 5s linear infinite}
+.coreCore{fill:#07182b;stroke:var(--cyan);stroke-width:2;filter:drop-shadow(0 0 9px var(--cyan))}
+.corePoint{fill:#fff;filter:drop-shadow(0 0 8px var(--cyan))}
+.coreTicks{fill:none;stroke:var(--cyan);stroke-width:1;opacity:.75}
+.coreLabel{text-anchor:middle;fill:#eaffff;font-size:9px;font-weight:900;letter-spacing:2px}
+.coreSub{text-anchor:middle;fill:var(--cyan);font-size:6px;letter-spacing:1px;opacity:.8}
+@keyframes coreSpin{to{transform:rotate(360deg);transform-origin:450px 255px}}
+@keyframes coreSpinReverse{to{transform:rotate(-360deg);transform-origin:450px 255px}}
+
+/* FUTURE CCTV FEEDS */
+.cctv{grid-template-columns:1fr 1fr;gap:7px}
+.cam{
+  height:112px;
+  border:1px solid rgba(88,246,255,.35);
+  background:
+    linear-gradient(rgba(15,38,60,.2),rgba(0,5,13,.65)),
+    radial-gradient(ellipse at 50% 40%,rgba(88,246,255,.14),transparent 46%),
+    linear-gradient(135deg,#0a1d31,#01040a 70%);
+  box-shadow:inset 0 0 20px rgba(0,200,255,.08),0 0 8px rgba(0,200,255,.06);
+}
+.cam:before{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(90deg,transparent 49.7%,rgba(88,246,255,.12) 50%,transparent 50.3%),
+    linear-gradient(0deg,transparent 49.7%,rgba(88,246,255,.12) 50%,transparent 50.3%),
+    repeating-linear-gradient(0deg,transparent 0 6px,rgba(88,246,255,.035) 6px 7px);
+}
+.cam:after{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);animation:camSweep 2.2s linear infinite;box-shadow:0 0 8px var(--cyan)}
+.camHud{position:absolute;left:6px;right:6px;top:5px;display:flex;justify-content:space-between;z-index:3;font-size:7px;letter-spacing:1px}
+.camHud b{color:#dffcff}.camHud i{font-style:normal;color:var(--red);text-shadow:0 0 6px var(--red)}
+.platform{position:absolute;left:5%;right:5%;bottom:25px;height:25px;border-top:1px solid rgba(88,246,255,.45);transform:perspective(80px) rotateX(22deg);opacity:.7}
+.platform:before,.platform:after{content:"";position:absolute;left:0;right:0;height:1px;background:rgba(88,246,255,.25)}
+.platform:before{top:7px}.platform:after{top:15px}
+.platform span{position:absolute;top:0;width:2px;height:22px;background:rgba(88,246,255,.2)}
+.platform span:nth-child(1){left:25%}.platform span:nth-child(2){left:55%}.platform span:nth-child(3){left:80%}
+.trainvis{position:absolute!important;bottom:31px!important;left:18%!important;width:64%!important;height:17px!important;
+border:1px solid rgba(215,251,255,.85)!important;border-radius:3px!important;background:linear-gradient(90deg,rgba(200,250,255,.18),rgba(255,255,255,.7),rgba(200,250,255,.18));
+box-shadow:0 0 10px rgba(40,207,255,.65),inset 0 0 7px rgba(88,246,255,.5)!important}
+.trainvis:before{content:"";position:absolute;left:7px;right:7px;top:4px;height:2px;background:rgba(88,246,255,.7);box-shadow:0 5px 0 rgba(88,246,255,.25)}
+.trainvis em{position:absolute;bottom:-4px;width:4px;height:4px;border-radius:50%;background:#02111c;border:1px solid var(--cyan)}
+.trainvis em:first-child{left:10px}.trainvis em:last-child{right:10px}
+.camTarget{position:absolute;width:32px;height:32px;left:50%;top:48%;transform:translate(-50%,-50%);border:1px solid rgba(88,246,255,.3);border-radius:50%}
+.camTarget:before,.camTarget:after{content:"";position:absolute;background:var(--cyan);opacity:.55}
+.camTarget:before{left:50%;top:-5px;width:1px;height:42px}.camTarget:after{top:50%;left:-5px;width:42px;height:1px}
+.cam span{left:5px;bottom:5px;font-size:6.5px;letter-spacing:.5px;color:#9bc5d3;z-index:4}
+@keyframes camSweep{from{top:3px}to{top:calc(100% - 3px)}}
+
+
+.metroLegend{transform:translate(0,0);fill:rgba(3,12,26,.82);stroke:rgba(88,246,255,.32);stroke-width:1}
+.metroLegend text:first-of-type{fill:#eafcff;font-size:8px;font-weight:900;letter-spacing:1px}
+.metroLegend text:last-of-type{fill:#58f6ff;font-size:6px;letter-spacing:1px}
+.ring3{stroke:#fff;stroke-width:.8;stroke-dasharray:1 4;opacity:.55;animation:coreSpin 3s linear infinite}
+.coreLabel{font-size:8px}
+.coreSub{font-size:5.5px}
+
+</style>
+</head>
+<body>
+<div id="app">
+<header><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+  <div class="brand">◉ METRO / OCC <small>METROPOLITAN OPERATIONS COMMAND CENTER</small></div>
+  <div class="clock"><span id="clock">00:00:00</span><small id="date">SYSTEM TIME // LIVE</small></div>
+  <div class="status"><b>● ALL SYSTEMS NOMINAL</b><div class="alert">▲ OPERATIONAL NOTICE // SIMULATION MODE</div></div>
+</header>
+
+<main>
+<div class="left">
+<section class="panel"><i class="corner tl"></i><i class="corner br"></i><div class="title">LINE STATUS // 各線運行狀態</div><div id="lines"></div></section>
+<section class="panel"><i class="corner tl"></i><i class="corner br"></i><div class="title">REAL-TIME TRAIN // 列車即時位置</div><table><tbody id="trains"></tbody></table></section>
+</div>
+
+<div class="center">
+<section class="map">
+ <div class="mapgrid"></div><div class="scan"></div>
+ <h2>◈ NETWORK COMMAND MAP <span>LIVE TRAIN TELEMETRY / 動態列車位置</span></h2>
+ <svg viewBox="0 0 900 510" preserveAspectRatio="xMidYMid meet">
+  <path class="route" style="color:#ff3d68;stroke:#ff3d68" d="M90 125 L210 160 L330 220 L450 255 L570 315 L760 350"/>
+  <path class="route" style="color:#25ffb0;stroke:#25ffb0" d="M450 55 L450 150 L450 255 L450 360 L450 475"/>
+  <path class="route" style="color:#b88cff;stroke:#b88cff" d="M760 120 L650 170 L560 220 L450 255 L350 320 L250 390"/>
+  <path class="route" style="color:#ffb72e;stroke:#ffb72e" d="M90 390 L220 370 L330 330 L450 300 L580 350 L800 420"/>
+  <path class="route" style="color:#45a7ff;stroke:#45a7ff" d="M160 255 L300 250 L450 255 L600 245 L790 210"/>
+  <g id="stations"></g><g id="movingTrains"></g>
+  <g class="commandCore">
+      <circle cx="450" cy="255" r="43" class="coreRing ring1"/>
+      <circle cx="450" cy="255" r="31" class="coreRing ring2"/>
+      <circle cx="450" cy="255" r="19" class="coreRing ring3"/>
+      <circle cx="450" cy="255" r="11" class="coreCore"/>
+      <circle cx="450" cy="255" r="4" class="corePoint"/>
+      <path d="M450 203 V220 M450 290 V307 M398 255 H415 M485 255 H502" class="coreTicks"/>
+      <path d="M416 221 L430 235 M484 221 L470 235 M416 289 L430 275 M484 289 L470 275" class="coreTicks"/>
+      <text x="450" y="326" class="coreLabel">OCC // CENTRAL INTERCHANGE</text>
+      <text x="450" y="339" class="coreSub">METRO NETWORK CONTROL // 24H</text>
+    </g>
+  <text x="80" y="112" class="maplabel">淡水</text><text x="770" y="365" class="maplabel">南港</text>
+  <text x="438" y="43" class="maplabel">北投</text><text x="438" y="500" class="maplabel">新店</text>
+  <text x="745" y="105" class="maplabel">機場</text><text x="75" y="410" class="maplabel">板橋</text>
+    <g class="metroLegend">
+      <rect x="18" y="18" width="170" height="48" rx="3"/>
+      <text x="28" y="34">METRO NETWORK / 臺北捷運</text>
+      <text x="28" y="50">LIVE ROUTE • TRAIN • SIGNAL</text>
+    </g>
+ </svg>
+</section>
+
+<section class="bottom">
+ <div class="metric"><small>ACTIVE TRAINS</small><div class="big" id="m1">142</div><div class="tiny">/ 146 units</div><div class="spark"><svg viewBox="0 0 240 55"><polyline id="spark1" fill="none" stroke="#16e8ff" stroke-width="2" points="0,42 20,35 40,38 60,25 80,31 100,20 120,27 140,13 160,22 180,15 200,19 220,8 240,12"/></svg></div></div>
+ <div class="metric"><small>ON-TIME RATE</small><div class="big" id="m2">98.7%</div><div class="tiny">Δ +0.3% / 15 MIN</div><div class="spark"><svg viewBox="0 0 240 55"><polyline id="spark2" fill="none" stroke="#25ffb0" stroke-width="2" points="0,35 20,32 40,40 60,29 80,30 100,18 120,25 140,20 160,22 180,14 200,18 220,10 240,13"/></svg></div></div>
+ <div class="metric"><small>PASSENGER FLOW</small><div class="big" id="m3">382,651</div><div class="tiny">TODAY // +<span id="flowDelta">12.4</span>%</div><div class="spark"><svg viewBox="0 0 240 55"><polyline id="spark3" fill="none" stroke="#ff2bd6" stroke-width="2" points="0,45 20,37 40,42 60,28 80,35 100,22 120,26 140,17 160,25 180,11 200,20 220,8 240,15"/></svg></div></div>
+</section>
+</div>
+
+<div class="right">
+<section class="panel"><i class="corner tl"></i><i class="corner br"></i><div class="title">METRO PLATFORM CCTV // 月台即時影像</div><div class="cctv">
+ <div class="cam"><div class="trainvis"></div><span>TAIPEI MAIN / CH01</span></div><div class="cam"><div class="trainvis"></div><span>CENTRAL / CH02</span></div>
+ <div class="cam"><div class="trainvis"></div><span>NORTH / CH03</span></div><div class="cam"><div class="trainvis"></div><span>SOUTH / CH04</span></div>
+ </div></section>
+<section class="panel"><i class="corner tl"></i><i class="corner br"></i><div class="title">SYSTEM ALERTS // 事件警示</div><div id="events"></div></section>
+</div>
+</main>
+<footer class="ticker"><span id="tickerText">>>> COMMANDER ONLINE // 全線列車運行監控正常 // DATA STREAM SYNCHRONIZED // NEXT UPDATE 00:00:01 >>> &nbsp;&nbsp;&nbsp;</span></footer>
+</div>
+
+<script>
+const lineData=[
+ ['BR','文湖線','good'],['R','淡水信義線','good'],['G','松山新店線','good'],
+ ['O','中和新蘆線','good'],['BL','板南線','warn'],['Y','環狀線','good'],['A','機場線','good']
+];
+const lines=document.getElementById('lines');
+function renderLines(){lines.innerHTML=lineData.map((x,i)=>`<div class="line"><span class="badge ${x[0]=='R'?'r':x[0]=='G'?'g':x[0]=='O'?'o':x[0]=='A'?'a':x[0]=='Y'?'y':'b'}">${x[0]}</span><span>${x[1]}</span><b class="${x[2]}">${x[2]=='good'?'正常':'延誤'} ${x[2]=='good'?(1.6+Math.random()*2).toFixed(1):'3.0'}分</b></div>`).join('')}
+renderLines();
+
+const trainNames=['1428','2056','3087','4120','5189','6234','7012','8420'];
+const stations=['台北車站','忠孝復興','松山','大安','頂溪','中和','西門','南港'];
+function renderTrains(){
+ document.getElementById('trains').innerHTML=trainNames.slice(0,6).map((n,i)=>`<tr><td>▣ ${n}</td><td>${stations[(i+Math.floor(Date.now()/3000))%stations.length]}</td><td>${(55+Math.random()*25).toFixed(0)} km/h</td></tr>`).join('');
+}
+renderTrains();
+
+const svg=document.getElementById('stations');
+for(let i=0;i<30;i++){let x=110+(i%10)*78,y=100+Math.floor(i/10)*120;svg.innerHTML+=`<circle class="station" style="color:#18cfff;stroke:#18cfff" cx="${x}" cy="${y}" r="4"/>`}
+const moving=document.getElementById('movingTrains');
+const routes=[
+ [[90,125],[210,160],[330,220],[450,255],[570,315],[760,350]],
+ [[450,55],[450,150],[450,255],[450,360],[450,475]],
+ [[760,120],[650,170],[560,220],[450,255],[350,320],[250,390]],
+ [[90,390],[220,370],[330,330],[450,300],[580,350],[800,420]],
+ [[160,255],[300,250],[450,255],[600,245],[790,210]]
+];
+let trainObjs=[];
+routes.forEach((r,ri)=>{for(let j=0;j<2;j++){let t=document.createElementNS('http://www.w3.org/2000/svg','g');t.classList.add('train');t.style.color=['#ff3d68','#25ffb0','#b88cff','#ffb72e','#45a7ff'][ri];t.innerHTML=`<rect x="-10" y="-5" width="20" height="10"/><circle cx="-5" cy="0" r="1.5"/><circle cx="5" cy="0" r="1.5"/>`;moving.appendChild(t);trainObjs.push({el:t,r,phase:j*.48});}});
+function pointOnRoute(r,p){let segs=[],total=0;for(let i=1;i<r.length;i++){let dx=r[i][0]-r[i-1][0],dy=r[i][1]-r[i-1][1],len=Math.hypot(dx,dy);segs.push(len);total+=len}let d=p*total;for(let i=0;i<segs.length;i++){if(d<=segs[i]){let q=d/segs[i];return [r[i][0]+(r[i+1][0]-r[i][0])*q,r[i][1]+(r[i+1][1]-r[i][1])*q]}d-=segs[i]}return r.at(-1)}
+function animateTrains(now){trainObjs.forEach((o,i)=>{let p=((now/8500+i*1700)%8500)/8500;p=(p+o.phase)%1;let [x,y]=pointOnRoute(o.r,p);o.el.setAttribute('transform',`translate(${x} ${y})`)});requestAnimationFrame(animateTrains)}requestAnimationFrame(animateTrains);
+
+const events=[
+ ['good','松山新店線','列車間距正常','14:32'],
+ ['good','淡水信義線','全線號誌同步','14:31'],
+ ['warn','板南線','列車間距調整 +3 分鐘','14:30'],
+ ['good','環狀線','設備運作正常','14:29'],
+ ['good','文湖線','月台門狀態正常','14:28'],
+ ['good','機場線','列車準點率穩定','14:27']
+];
+function renderEvents(){document.getElementById('events').innerHTML=events.map((e,i)=>`<div class="alertrow"><i class="dot ${e[0]}"></i><span>${e[1]} // ${e[2]}</span><span class="tiny">${e[3]}</span></div>`).join('')}
+renderEvents();
+
+function tick(){
+ const d=new Date(), pad=n=>String(n).padStart(2,'0');
+ document.getElementById('clock').textContent=`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+ document.getElementById('date').textContent=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} // COMMAND CLOCK // SYNC ${Math.floor(performance.now()/1000)%60}s`;
+ const m1=139+Math.floor(Math.random()*8), m2=(97.9+Math.random()*1.8).toFixed(1), m3=382000+Math.floor(Math.random()*1800);
+ document.getElementById('m1').textContent=m1;document.getElementById('m2').textContent=m2+'%';document.getElementById('m3').textContent=m3.toLocaleString();
+ document.getElementById('flowDelta').textContent=(10+Math.random()*5).toFixed(1);
+ renderTrains();renderLines();
+}
+setInterval(tick,1000);tick();
+
+const tickerMsgs=['>>> COMMANDER ONLINE // 全線列車運行監控正常','>>> DATA STREAM SYNCHRONIZED // 即時列車位置已更新','>>> SYSTEM HEARTBEAT // 所有控制節點回應正常','>>> NOTICE // 模擬資料流持續運作'];
+let ti=0;setInterval(()=>{ti=(ti+1)%tickerMsgs.length;document.getElementById('tickerText').textContent=tickerMsgs[ti]+' // NEXT TELEMETRY FRAME 00:00:01 >>>   '},4500);
+</script>
+</body>
+</html>
